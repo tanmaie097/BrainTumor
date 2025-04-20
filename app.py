@@ -8,29 +8,31 @@ import gdown
 # MUST be the first Streamlit command
 st.set_page_config(page_title="Brain Tumor Classifier", page_icon="🧠", layout="centered")
 
-# Load model once and download from Google Drive if not available
+# =========================
+# Load model (from Drive if needed)
+# =========================
 @st.cache_resource
 def load_model():
     model_path = 'brain_tumor_model.h5'
     
     if not os.path.exists(model_path):
         with st.spinner("📥 Downloading brain tumor detection model..."):
-            url = 'https://drive.google.com/uc?id=1IVSNk-_apRYtiS32Lh-ZHBB7JvwmWUun'
-            gdown.download(url, model_path, quiet=False)
+            url = 'https://drive.google.com/uc?id=13wz4umsZx-UgPBdYGxSxNmXA1hLLVmEG'
+            gdown.download(url, model_path, quiet=False, fuzzy=True)
 
     return tf.keras.models.load_model(model_path)
 
 model = load_model()
 classes = ['No Tumor', 'Pituitary Tumor']
 
-# Initialize history
+# =========================
+# Sidebar + Theme Switch
+# =========================
 if 'history' not in st.session_state:
     st.session_state.history = []
 
-# Sidebar Theme Toggle
 theme_mode = st.sidebar.radio("🌗 Theme", ("Light", "Dark"))
 
-# Apply dark theme (simulated)
 if theme_mode == "Dark":
     st.markdown(
         """
@@ -44,7 +46,7 @@ if theme_mode == "Dark":
         unsafe_allow_html=True
     )
 
-# Sidebar AI Chatbot
+# AI Assistant
 st.sidebar.markdown("### 🤖 AI Assistant")
 user_input = st.sidebar.text_input("Ask me anything")
 
@@ -57,7 +59,9 @@ if user_input:
     else:
         st.sidebar.write("I'm here to help you understand tumor predictions!")
 
-# Title and Description
+# =========================
+# Main Page Layout
+# =========================
 st.markdown(
     """
     <h1 style='text-align: center; color: #6a0dad;'>🧠 Brain Tumor Classification</h1>
@@ -66,10 +70,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# File uploader
 uploaded_file = st.file_uploader("📤 Upload an MRI image", type=["jpg", "jpeg", "png"])
 
-if uploaded_file is not None:
+if uploaded_file:
     image = Image.open(uploaded_file)
     st.markdown("### 🖼 Uploaded Image")
     st.image(image, use_column_width=True)
@@ -77,12 +80,12 @@ if uploaded_file is not None:
     # Preprocess image
     image = image.resize((224, 224))
     img_array = np.array(image)
-    if img_array.shape[-1] == 4:
+    if img_array.shape[-1] == 4:  # Remove alpha channel if present
         img_array = img_array[:, :, :3]
     img_array = img_array / 255.0
     img_array = np.expand_dims(img_array, axis=0)
 
-    # Prediction
+    # Predict
     prediction = model.predict(img_array)
     predicted_class = np.argmax(prediction)
     confidence = prediction[0][predicted_class]
@@ -90,13 +93,11 @@ if uploaded_file is not None:
     # Display result
     st.markdown("---")
     col1, col2 = st.columns([1, 2])
-    
     with col1:
         if predicted_class == 0:
             st.success("✅ *No Tumor Detected*")
         else:
             st.error("⚠ *Pituitary Tumor Detected*")
-
     with col2:
         st.markdown("*Confidence Level:*")
         st.progress(int(confidence * 100))
@@ -109,7 +110,9 @@ if uploaded_file is not None:
         "confidence": f"{confidence * 100:.2f}%"
     })
 
-# Show history
+# =========================
+# History Panel
+# =========================
 with st.expander("🕓 View Prediction History"):
     if st.session_state.history:
         for i, entry in enumerate(reversed(st.session_state.history), 1):
