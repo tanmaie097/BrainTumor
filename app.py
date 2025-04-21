@@ -25,7 +25,7 @@ model = load_model()
 classes = ['No Tumor', 'Pituitary Tumor']
 
 # =========================
-# Gemini AI Chat Assistant (Compatible with v1beta)
+# Gemini AI Assistant (v1 Stable + gemini-pro)
 # =========================
 st.sidebar.markdown("### 🤖 Gemini Assistant")
 user_input = st.sidebar.text_input("Ask me anything")
@@ -34,11 +34,12 @@ if "GEMINI_API_KEY" not in st.secrets:
     st.sidebar.error("❌ Gemini API key missing. Please add it in Streamlit secrets.")
 else:
     try:
+        import google.generativeai as genai
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
         if user_input:
             st.sidebar.markdown("*Gemini says:*")
-            model = genai.GenerativeModel("text-bison-001")  # ✅ works with v1beta
+            model = genai.GenerativeModel("gemini-pro")  # ✅ works with v1
             response = model.generate_content(user_input)
             st.sidebar.write(response.text)
 
