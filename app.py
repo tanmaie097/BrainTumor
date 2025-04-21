@@ -34,17 +34,20 @@ if "GEMINI_API_KEY" not in st.secrets:
     st.sidebar.error("❌ Gemini API key missing. Please add it in Streamlit secrets.")
 else:
     try:
+        import google.generativeai as genai
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-        gemini_model = genai.GenerativeModel("gemini-pro")
 
         if user_input:
             st.sidebar.markdown("*Gemini says:*")
-            gemini_response = gemini_model.generate_content(user_input)
-            st.sidebar.write(gemini_response.text)
+
+            convo = genai.chat(model="models/chat-bison-001")
+            convo.send_message(user_input)
+            st.sidebar.write(convo.last)
 
     except Exception as e:
         st.sidebar.error("⚠️ Error using Gemini API.")
         st.sidebar.code(str(e))
+
 
 # =========================
 # Theme + Layout
