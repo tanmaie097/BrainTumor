@@ -4,19 +4,34 @@ import numpy as np
 from PIL import Image
 import os
 import gdown
-import google.generativeai as genai
+import requests
 
-# MUST be the first Streamlit command
+# Hugging Face Chatbot Config
+HF_API_URL = "https://api-inference.huggingface.co/models/meta-llama/Llama-2-7b-chat-hf"
+HF_HEADERS = {"Authorization": f"Bearer {st.secrets['HF_TOKEN']}"}
+
+def chat_with_llama(prompt):
+    try:
+        payload = {
+            "inputs": f"<s>[INST] {prompt} [/INST]",
+            "options": {"use_cache": True}
+        }
+        response = requests.post(HF_API_URL, headers=HF_HEADERS, json=payload)
+        response.raise_for_status()
+        generated = response.json()[0]["generated_text"]
+        return generated.split("[/INST]")[-1].strip()
+    except Exception as e:
+        return f"⚠️ Chatbot error: {e}"
+
+# Page config
 st.set_page_config(page_title="Brain Tumor Classifier", page_icon="🧠", layout="centered")
 
-# =========================
 # Load model from Google Drive if needed
-# =========================
 @st.cache_resource
 def load_model():
     model_path = 'brain_tumor_model.h5'
     if not os.path.exists(model_path):
-        with st.spinner("📥 Downloading brain tumor detection model..."):
+        with st.spinner("📥 Downloading model..."):
             url = 'https://drive.google.com/uc?id=13wz4umsZx-UgPBdYGxSxNmXA1hLLVmEG'
             gdown.download(url, model_path, fuzzy=True, quiet=False)
     return tf.keras.models.load_model(model_path)
@@ -24,40 +39,16 @@ def load_model():
 model = load_model()
 classes = ['No Tumor', 'Pituitary Tumor']
 
-# =========================
-# ChatGPT AI Assistant (OpenAI >= 1.0.0)
-# =========================
-import openai
-
-st.sidebar.markdown("### 🤖 ChatGPT Assistant")
+# Sidebar: Chatbot
+st.sidebar.markdown("### 🤖 LLaMA 2 Chat Assistant")
 user_input = st.sidebar.text_input("Ask me anything")
 
-if "OPENAI_API_KEY" not in st.secrets:
-    st.sidebar.error("❌ OpenAI API key missing. Please add it in Streamlit secrets.")
-else:
-    try:
-        client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+if user_input:
+    st.sidebar.markdown("*LLaMA 2 says:*")
+    reply = chat_with_llama(user_input)
+    st.sidebar.write(reply)
 
-        if user_input:
-            st.sidebar.markdown("*ChatGPT says:*")
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo",  # or "gpt-4" if you have access
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant that explains brain tumor predictions."},
-                    {"role": "user", "content": user_input}
-                ]
-            )
-            answer = response.choices[0].message.content
-            st.sidebar.write(answer)
-
-    except Exception as e:
-        st.sidebar.error("⚠️ Error using ChatGPT API.")
-        st.sidebar.code(str(e))
-
-
-# =========================
-# Theme + Layout
-# =========================
+# Theme Toggle
 if 'history' not in st.session_state:
     st.session_state.history = []
 
@@ -68,22 +59,20 @@ if theme_mode == "Dark":
         unsafe_allow_html=True
     )
 
+# Title
 st.markdown("""
 <h1 style='text-align: center; color: #6a0dad;'>🧠 Brain Tumor Classification</h1>
 <p style='text-align: center;'>Upload an MRI image to detect brain tumors using AI</p>
 """, unsafe_allow_html=True)
 
-# =========================
-# Image Upload and Prediction
-# =========================
+# Upload + Predict
 uploaded_file = st.file_uploader("📤 Upload an MRI image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file:
     image = Image.open(uploaded_file)
-    st.markdown("### 🖼 Uploaded Image")
-    st.image(image, use_column_width=True)
+    st.image(image, use_column_width=True, caption="Uploaded Image")
 
-    # Preprocess image
+    # Preprocess
     image = image.resize((224, 224))
     img_array = np.array(image)
     if img_array.shape[-1] == 4:
@@ -91,12 +80,12 @@ if uploaded_file:
     img_array = img_array / 255.0
     img_array = np.expand_dims(img_array, axis=0)
 
-    # Prediction
+    # Predict
     prediction = model.predict(img_array)
     predicted_class = np.argmax(prediction)
     confidence = prediction[0][predicted_class]
 
-    # Display result
+    # Result
     st.markdown("---")
     col1, col2 = st.columns([1, 2])
     with col1:
@@ -116,13 +105,11 @@ if uploaded_file:
         "confidence": f"{confidence * 100:.2f}%"
     })
 
-# =========================
-# Prediction History
-# =========================
+# History
 with st.expander("🕓 View Prediction History"):
     if st.session_state.history:
         for i, entry in enumerate(reversed(st.session_state.history), 1):
-            st.markdown(f"{i}. **{entry['image']}** — Prediction: *{entry['prediction']}*, Confidence: {entry['confidence']}")
+            st.markdown(f"{i}. **{entry['image']}** — *{entry['prediction']}*, Confidence: {entry['confidence']}")
     else:
         st.write("No history yet.")
 
