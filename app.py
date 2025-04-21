@@ -25,7 +25,7 @@ model = load_model()
 classes = ['No Tumor', 'Pituitary Tumor']
 
 # =========================
-# Gemini AI Chat Assistant (Fixed)
+# Gemini AI Chat Assistant (Fixed with gemini-pro)
 # =========================
 st.sidebar.markdown("### 🤖 Gemini Assistant")
 user_input = st.sidebar.text_input("Ask me anything")
@@ -35,14 +35,18 @@ if "GEMINI_API_KEY" not in st.secrets:
 else:
     try:
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+
         if user_input:
             st.sidebar.markdown("*Gemini says:*")
-            model = genai.GenerativeModel(model_name="models/chat-bison-001")
+
+            model = genai.GenerativeModel("gemini-pro")  # ✅ This works with generate_content
             response = model.generate_content(user_input)
             st.sidebar.write(response.text)
+
     except Exception as e:
         st.sidebar.error("⚠️ Error using Gemini API.")
         st.sidebar.code(str(e))
+
 
 # =========================
 # Theme + Layout
