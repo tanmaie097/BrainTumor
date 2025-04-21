@@ -25,9 +25,9 @@ model = load_model()
 classes = ['No Tumor', 'Pituitary Tumor']
 
 # =========================
-# ChatGPT AI Assistant (OpenAI)
+# ChatGPT AI Assistant (OpenAI >= 1.0.0)
 # =========================
-import openai  # <- Make sure this is at the top of your file
+import openai
 
 st.sidebar.markdown("### 🤖 ChatGPT Assistant")
 user_input = st.sidebar.text_input("Ask me anything")
@@ -36,20 +36,18 @@ if "OPENAI_API_KEY" not in st.secrets:
     st.sidebar.error("❌ OpenAI API key missing. Please add it in Streamlit secrets.")
 else:
     try:
-        openai.api_key = st.secrets["OPENAI_API_KEY"]
+        client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
         if user_input:
             st.sidebar.markdown("*ChatGPT says:*")
-
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-3.5-turbo",  # or "gpt-4" if you have access
                 messages=[
-                    {"role": "system", "content": "You are a helpful assistant who explains brain tumors and predictions."},
+                    {"role": "system", "content": "You are a helpful assistant that explains brain tumor predictions."},
                     {"role": "user", "content": user_input}
                 ]
             )
-
-            answer = response["choices"][0]["message"]["content"]
+            answer = response.choices[0].message.content
             st.sidebar.write(answer)
 
     except Exception as e:
