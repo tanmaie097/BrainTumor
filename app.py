@@ -25,10 +25,7 @@ model = load_model()
 classes = ['No Tumor', 'Pituitary Tumor']
 
 # =========================
-# Sidebar Gemini Chatbot
-# =========================
-# =========================
-# Gemini AI Chat Assistant (Free via Makersuite)
+# Gemini AI Chat Assistant (Fixed)
 # =========================
 st.sidebar.markdown("### 🤖 Gemini Assistant")
 user_input = st.sidebar.text_input("Ask me anything")
@@ -37,21 +34,15 @@ if "GEMINI_API_KEY" not in st.secrets:
     st.sidebar.error("❌ Gemini API key missing. Please add it in Streamlit secrets.")
 else:
     try:
-        import google.generativeai as genai
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-
         if user_input:
             st.sidebar.markdown("*Gemini says:*")
-
-            convo = genai.chat(model="models/chat-bison-001")
-            convo.send_message(user_input)
-            st.sidebar.write(convo.last)
-
+            model = genai.GenerativeModel(model_name="models/chat-bison-001")
+            response = model.generate_content(user_input)
+            st.sidebar.write(response.text)
     except Exception as e:
         st.sidebar.error("⚠️ Error using Gemini API.")
         st.sidebar.code(str(e))
-
-
 
 # =========================
 # Theme + Layout
