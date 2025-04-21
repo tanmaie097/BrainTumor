@@ -25,26 +25,35 @@ model = load_model()
 classes = ['No Tumor', 'Pituitary Tumor']
 
 # =========================
-# Gemini AI Assistant (v1 Stable + gemini-pro)
+# ChatGPT AI Assistant (OpenAI)
 # =========================
-st.sidebar.markdown("### 🤖 Gemini Assistant")
+import openai  # <- Make sure this is at the top of your file
+
+st.sidebar.markdown("### 🤖 ChatGPT Assistant")
 user_input = st.sidebar.text_input("Ask me anything")
 
-if "GEMINI_API_KEY" not in st.secrets:
-    st.sidebar.error("❌ Gemini API key missing. Please add it in Streamlit secrets.")
+if "OPENAI_API_KEY" not in st.secrets:
+    st.sidebar.error("❌ OpenAI API key missing. Please add it in Streamlit secrets.")
 else:
     try:
-        import google.generativeai as genai
-        genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+        openai.api_key = st.secrets["OPENAI_API_KEY"]
 
         if user_input:
-            st.sidebar.markdown("*Gemini says:*")
-            model = genai.GenerativeModel("gemini-pro")  # ✅ works with v1
-            response = model.generate_content(user_input)
-            st.sidebar.write(response.text)
+            st.sidebar.markdown("*ChatGPT says:*")
+
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",  # or "gpt-4" if you have access
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant who explains brain tumors and predictions."},
+                    {"role": "user", "content": user_input}
+                ]
+            )
+
+            answer = response["choices"][0]["message"]["content"]
+            st.sidebar.write(answer)
 
     except Exception as e:
-        st.sidebar.error("⚠️ Error using Gemini API.")
+        st.sidebar.error("⚠️ Error using ChatGPT API.")
         st.sidebar.code(str(e))
 
 
