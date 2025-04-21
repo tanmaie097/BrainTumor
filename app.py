@@ -25,7 +25,7 @@ model = load_model()
 classes = ['No Tumor', 'Pituitary Tumor']
 
 # =========================
-# Gemini AI Chat Assistant (Fixed with gemini-pro)
+# Gemini AI Chat Assistant (Compatible with v1beta)
 # =========================
 st.sidebar.markdown("### 🤖 Gemini Assistant")
 user_input = st.sidebar.text_input("Ask me anything")
@@ -38,8 +38,7 @@ else:
 
         if user_input:
             st.sidebar.markdown("*Gemini says:*")
-
-            model = genai.GenerativeModel("gemini-pro")  # ✅ This works with generate_content
+            model = genai.GenerativeModel("text-bison-001")  # ✅ works with v1beta
             response = model.generate_content(user_input)
             st.sidebar.write(response.text)
 
