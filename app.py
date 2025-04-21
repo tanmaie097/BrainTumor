@@ -27,6 +27,9 @@ classes = ['No Tumor', 'Pituitary Tumor']
 # =========================
 # Sidebar Gemini Chatbot
 # =========================
+# =========================
+# Gemini AI Chat Assistant (Free via Makersuite)
+# =========================
 st.sidebar.markdown("### 🤖 Gemini Assistant")
 user_input = st.sidebar.text_input("Ask me anything")
 
@@ -47,6 +50,7 @@ else:
     except Exception as e:
         st.sidebar.error("⚠️ Error using Gemini API.")
         st.sidebar.code(str(e))
+
 
 
 # =========================
