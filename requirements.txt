@@ -3,4 +3,4 @@ tensorflow
 numpy
 pillow
 gdown
-google-generativeai
+google-generativeai>=0.3.2  # ✅ Force version with Gemini v1 support
