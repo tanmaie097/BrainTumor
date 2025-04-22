@@ -6,3 +6,6 @@ google-generativeai
 tensorflow
 gdown
 openai>=1.0.0
+streamlit
+google-generativeai
+
