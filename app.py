@@ -1,24 +1,37 @@
 import streamlit as st
-import google.generativeai as genai
+import requests
 
-# Page setup
-st.set_page_config(page_title="Gemini Pro Chatbot", page_icon="🤖")
+# ----------------------------
+# Hugging Face Setup
+# ----------------------------
+HF_API_URL = "https://api-inference.huggingface.co/models/bigscience/bloomz-560m"
+HF_HEADERS = {"Authorization": f"Bearer {st.secrets['HF_TOKEN']}"}
 
-# Gemini API key from secrets
-genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+# ----------------------------
+# Function to generate reply
+# ----------------------------
+def ask_bloom(prompt):
+    try:
+        response = requests.post(HF_API_URL, headers=HF_HEADERS, json={"inputs": prompt})
+        response.raise_for_status()
+        return response.json()[0]["generated_text"]
+    except Exception as e:
+        return f"⚠️ Chatbot error: {e}"
 
-# Load Gemini Pro model
-model = genai.GenerativeModel(model_name="models/gemini-pro")
+# ----------------------------
+# Streamlit UI
+# ----------------------------
+st.set_page_config(page_title="Free Chatbot", page_icon="💬")
+st.title("🤖 Free & Friendly Chatbot")
+st.markdown("Ask me anything! I’ll try to answer using a free Hugging Face model.")
 
-# UI
-st.title("🤖 Gemini Pro Chatbot")
-prompt = st.text_input("💬 Ask me anything")
+user_input = st.text_input("💬 Your question")
 
-if prompt:
-    with st.spinner("Generating response..."):
-        try:
-            response = model.generate_content(prompt)
-            st.markdown("### 💡 Response")
-            st.write(response.text)
-        except Exception as e:
-            st.error(f"⚠️ Chatbot error: {e}")
+if user_input:
+    with st.spinner("Thinking..."):
+        answer = ask_bloom(user_input)
+        st.markdown("### 💡 Answer")
+        st.write(answer)
+
+st.markdown("---")
+st.caption("🔓 Powered by `bigscience/bloomz-560m` via Hugging Face")
