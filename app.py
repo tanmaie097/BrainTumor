@@ -1,22 +1,22 @@
 import streamlit as st
-import openai
+from openai import OpenAI
 
 # =====================
-# Streamlit Config
+# Config
 # =====================
-st.set_page_config(page_title="ChatGPT AI Assistant", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="ChatGPT Assistant", page_icon="🤖", layout="centered")
 
 # =====================
-# OpenAI API Setup
+# OpenAI Setup
 # =====================
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 def ask_chatgpt(prompt):
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  # Or gpt-4 if you have access
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a helpful and intelligent assistant."},
+                {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt}
             ]
         )
@@ -34,9 +34,9 @@ user_input = st.text_input("💬 Your question")
 
 if user_input:
     with st.spinner("Thinking..."):
-        response = ask_chatgpt(user_input)
+        answer = ask_chatgpt(user_input)
         st.markdown("### 💡 Answer")
-        st.write(response)
+        st.write(answer)
 
 st.markdown("---")
-st.caption("🔐 Powered by OpenAI | Model: GPT-3.5-Turbo")
+st.caption("🔐 Powered by OpenAI | Model: GPT-3.5 Turbo")
