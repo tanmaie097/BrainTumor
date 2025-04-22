@@ -1,40 +1,42 @@
 import streamlit as st
-import requests
+import openai
 
-# ===============================
-# Page Config
-# ===============================
-st.set_page_config(page_title="FLAN-T5 Chatbot", page_icon="🤖", layout="centered")
+# =====================
+# Streamlit Config
+# =====================
+st.set_page_config(page_title="ChatGPT AI Assistant", page_icon="🤖", layout="centered")
 
-# ===============================
-# Hugging Face FLAN-T5 Setup
-# ===============================
-HF_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base"
-HF_HEADERS = {"Authorization": f"Bearer {st.secrets['HF_TOKEN']}"}
+# =====================
+# OpenAI API Setup
+# =====================
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-def ask_flan(prompt):
+def ask_chatgpt(prompt):
     try:
-        payload = {"inputs": prompt}
-        response = requests.post(HF_API_URL, headers=HF_HEADERS, json=payload)
-        response.raise_for_status()
-        return response.json()[0]["generated_text"]
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",  # Or gpt-4 if you have access
+            messages=[
+                {"role": "system", "content": "You are a helpful and intelligent assistant."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        return response.choices[0].message.content.strip()
     except Exception as e:
         return f"⚠️ Error: {e}"
 
-# ===============================
-# Streamlit Chatbot UI
-# ===============================
-st.title("🤖 FLAN-T5 AI Chatbot")
+# =====================
+# UI
+# =====================
+st.title("🤖 ChatGPT Assistant")
+st.markdown("Ask me anything!")
 
-st.markdown("Ask me anything! I’ll respond using the FLAN-T5 model from Hugging Face 🤖")
-
-user_input = st.text_input("💬 Enter your question")
+user_input = st.text_input("💬 Your question")
 
 if user_input:
     with st.spinner("Thinking..."):
-        answer = ask_flan(user_input)
+        response = ask_chatgpt(user_input)
         st.markdown("### 💡 Answer")
-        st.write(answer)
+        st.write(response)
 
 st.markdown("---")
-st.caption("🚀 Powered by FLAN-T5 on Hugging Face Inference API")
+st.caption("🔐 Powered by OpenAI | Model: GPT-3.5-Turbo")
