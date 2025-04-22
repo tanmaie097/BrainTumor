@@ -5,5 +5,5 @@ duckduckgo-search
 google-generativeai
 tensorflow
 gdown
-# OR if using openai:
-# openai
+
+openai
