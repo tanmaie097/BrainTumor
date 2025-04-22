@@ -1,6 +1,7 @@
 streamlit
-tensorflow
-numpy
-pillow
-gdown
 requests
+beautifulsoup4
+duckduckgo-search
+google-generativeai
+# OR if using openai:
+# openai
