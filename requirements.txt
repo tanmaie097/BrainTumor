@@ -1,16 +1,2 @@
 streamlit
-
-pip install --upgrade google-generativeai
 requests
-beautifulsoup4
-duckduckgo-search
-google-generativeai
-tensorflow
-gdown
-openai>=1.0.0
-streamlit
-streamlit
-google-generativeai>=0.3.2
-
-
-
