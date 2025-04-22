@@ -5,5 +5,4 @@ duckduckgo-search
 google-generativeai
 tensorflow
 gdown
-
-openai
+openai>=1.0.0
