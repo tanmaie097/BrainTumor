@@ -1,2 +1,7 @@
 streamlit
+tensorflow
+numpy
+Pillow
+gdown
 requests
+duckduckgo-search
