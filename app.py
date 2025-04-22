@@ -1,24 +1,18 @@
 import streamlit as st
 import google.generativeai as genai
 
-# ====================
-# Gemini Setup
-# ====================
-st.set_page_config(page_title="Gemini Pro Chatbot", page_icon="🧠")
+# Page setup
+st.set_page_config(page_title="Gemini Pro Chatbot", page_icon="🤖")
 
-# Load API key
+# Gemini API key from secrets
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
-# Initialize Gemini model
+# Load Gemini Pro model
 model = genai.GenerativeModel(model_name="models/gemini-pro")
 
-# ====================
-# Streamlit UI
-# ====================
+# UI
 st.title("🤖 Gemini Pro Chatbot")
-st.markdown("Ask me anything — I'm powered by Google's Gemini Pro.")
-
-prompt = st.text_input("💬 Your question")
+prompt = st.text_input("💬 Ask me anything")
 
 if prompt:
     with st.spinner("Generating response..."):
