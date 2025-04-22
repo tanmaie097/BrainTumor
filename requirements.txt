@@ -3,5 +3,7 @@ requests
 beautifulsoup4
 duckduckgo-search
 google-generativeai
+tensorflow
+
 # OR if using openai:
 # openai
