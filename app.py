@@ -1,42 +1,45 @@
 import streamlit as st
-from openai import OpenAI
+import google.generativeai as genai
 
-# =====================
-# Config
-# =====================
-st.set_page_config(page_title="ChatGPT Assistant", page_icon="🤖", layout="centered")
+# ===============================
+# Page config
+# ===============================
+st.set_page_config(page_title="Gemini Chatbot", page_icon="💬", layout="centered")
 
-# =====================
-# OpenAI Setup
-# =====================
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+# ===============================
+# Configure Gemini
+# ===============================
+if "GEMINI_API_KEY" not in st.secrets:
+    st.error("🔑 Please add your Gemini API key to Streamlit secrets.")
+    st.stop()
 
-def ask_chatgpt(prompt):
-    try:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        return response.choices[0].message.content.strip()
-    except Exception as e:
-        return f"⚠️ Error: {e}"
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
-# =====================
-# UI
-# =====================
-st.title("🤖 ChatGPT Assistant")
-st.markdown("Ask me anything!")
+# ===============================
+# Initialize Gemini Model
+# ===============================
+try:
+    model = genai.GenerativeModel("gemini-pro")
+except Exception as e:
+    st.error(f"❌ Failed to load Gemini model: {e}")
+    st.stop()
 
-user_input = st.text_input("💬 Your question")
+# ===============================
+# Streamlit UI
+# ===============================
+st.title("🤖 Gemini Pro Chatbot")
+st.markdown("Ask me anything! I'm powered by Google's Gemini model.")
+
+user_input = st.text_input("💬 Type your message:")
 
 if user_input:
     with st.spinner("Thinking..."):
-        answer = ask_chatgpt(user_input)
-        st.markdown("### 💡 Answer")
-        st.write(answer)
+        try:
+            response = model.generate_content(user_input)
+            st.markdown("### 💡 Response")
+            st.write(response.text)
+        except Exception as e:
+            st.error(f"⚠️ Chatbot error: {e}")
 
 st.markdown("---")
-st.caption("🔐 Powered by OpenAI | Model: GPT-3.5 Turbo")
+st.caption("✨ Powered by Google Gemini via Generative AI API")
