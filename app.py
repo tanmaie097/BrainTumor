@@ -15,7 +15,7 @@ st.set_page_config(page_title="Brain Tumor Classifier", page_icon="🧠", layout
 # ===============================
 # Hugging Face + DuckDuckGo Search Chatbot
 # ===============================
-HF_API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1"
+HF_API_URL = "https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-alpha"  # ✅ Zephyr model (open access)
 HF_HEADERS = {"Authorization": f"Bearer {st.secrets['HF_TOKEN']}"}
 
 def search_web(query, num_results=5):
@@ -27,7 +27,7 @@ def search_web(query, num_results=5):
                 results.append(f"- {snippet}")
     return results
 
-def chat_with_mistral(question):
+def chat_with_zephyr(question):
     snippets = search_web(question)
     if not snippets:
         return "No web results found. Try rephrasing your question."
@@ -63,14 +63,14 @@ model = load_model()
 classes = ['No Tumor', 'Pituitary Tumor']
 
 # ===============================
-# Sidebar: Web Chatbot
+# Sidebar: Zephyr Chatbot
 # ===============================
-st.sidebar.markdown("### 🤖 Ask the AI Assistant")
+st.sidebar.markdown("### 🤖 Web-Powered Assistant")
 user_input = st.sidebar.text_input("Ask anything (real-time info)")
 
 if user_input:
     st.sidebar.markdown("*Searching + Generating Answer...*")
-    reply = chat_with_mistral(user_input)
+    reply = chat_with_zephyr(user_input)
     st.sidebar.write(reply)
 
 # ===============================
